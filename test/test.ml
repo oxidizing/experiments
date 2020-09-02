@@ -20,7 +20,6 @@ module Config : sig
   module type Provider = sig
     type key
     val get : key -> value option
-
   end
 
   module type S = sig
@@ -100,9 +99,9 @@ module WebServer = struct
 end
 
 module FakeEnvConfigProvider : sig
-  module Make (K: Config.Keys) (C: Config.S with type key = K.t): Config.Provider with type key = K.t
+  module Make (K: Config.Keys) : Config.Provider with type key = K.t
 end = struct
-  module Make (K: Config.Keys) (C: Config.S with type key = K.t) = struct
+  module Make (K: Config.Keys) = struct
     type key = K.t
     let get k =
       let key_name = K.get_name k in
@@ -116,9 +115,9 @@ end = struct
 end
 
 module EmptyConfigProvider : sig
-  module Make (K: Config.Keys) (C: Config.S with type key = K.t): Config.Provider with type key = K.t
+  module Make (K: Config.Keys) : Config.Provider with type key = K.t
 end = struct
-  module Make (K: Config.Keys) (C: Config.S with type key = K.t) = struct
+  module Make (K: Config.Keys) = struct
     type key = K.t
     let get _ = None
   end
@@ -133,10 +132,10 @@ module AppKeys : Config.Keys with type t = [ Smtp.Config.key | WebServer.Config.
       | #WebServer.Config.key as k -> WebServer.Config.get_key_name k
 end
 
-module rec AppConfig : Config.S with type key = AppKeys.t = Config.Make (AppKeys) (ConfigProvider)
-and EnvConfigProvider : Config.Provider with type key = AppKeys.t = FakeEnvConfigProvider.Make (AppKeys) (AppConfig)
-and DummyConfigProvider : Config.Provider with type key = AppKeys.t = EmptyConfigProvider.Make (AppKeys) (AppConfig)
-and ConfigProvider : Config.Provider with type key = AppKeys.t = Config.ChainedProvider (AppKeys) (EnvConfigProvider) (DummyConfigProvider)
+module EnvConfigProvider : Config.Provider with type key = AppKeys.t = FakeEnvConfigProvider.Make (AppKeys)
+module DummyConfigProvider : Config.Provider with type key = AppKeys.t = EmptyConfigProvider.Make (AppKeys)
+module ConfigProvider : Config.Provider with type key = AppKeys.t = Config.ChainedProvider (AppKeys) (EnvConfigProvider) (DummyConfigProvider)
+module AppConfig : Config.S with type key = AppKeys.t = Config.Make (AppKeys) (ConfigProvider)
 
 module Test = struct
   let pp : Format.formatter -> Config.value -> unit = fun fmt value -> match value with
