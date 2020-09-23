@@ -1,6 +1,2 @@
-(test
- (name test)
- (libraries
-  alcotest
-  alcotest-lwt
-))
+;;
+test (name test) (libraries alcotest alcotest - lwt)
