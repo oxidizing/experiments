@@ -4,3 +4,10 @@
    alcotest
  )
 )
+(env
+ (_
+  (env-vars
+    (OCAMLRUNPARAM b)
+  )
+ )
+)
