@@ -1,0 +1,3 @@
+(executable
+ (libraries lwt lwt.unix)
+ (name app))
